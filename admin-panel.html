@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+         /* Resetted Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f2f2f2; /* Light grey background, matched from image */
+            color: #333; /* Darker default text color */
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 240px; /* Increased width slightly */
+            background-color: #091e38; /* Dark blue sidebar, matched from image */
+            color: white;
+            padding: 20px;
+            transition: width 0.3s ease;
+            z-index: 10;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            padding: 12px 0;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease; /* Subtle transitions */
+            display: flex;
+            align-items: center;
+            font-size: 1em;
+            color: #9db4c7; /* Matched from image */
+        }
+
+        .sidebar li i {
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+            color: #f7941d; /* Orange icon color, matched from image */
+            transition: color 0.2s ease;
+        }
+
+        .sidebar li:hover {
+            background-color: #1a397a; /* Hover color */
+        }
+
+        .sidebar li.active {
+            background-color: white; /* White highlight */
+            color: #091e38; /* Dark blue text when active */
+        }
+
+        .sidebar li.active > i {
+            color: #f7941d; /* Orange icon when active */
+        }
+
+        /* Collapsed Sidebar Styles */
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar.collapsed .sidebar-logo h1 {
+            display: none;
+        }
+
+       .sidebar.collapsed li span {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            border-bottom: none;
+        }
+
+        .sidebar.collapsed .sidebar-logo img {
+            margin: 0 auto;
+        }
+
+        #sidebar-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            z-index: 11;
+        }
+
+         /* Sidebar Logo Styles */
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            transition: border-bottom 0.3s ease;
+        }
+
+        .sidebar-logo img {
+             height: 40px;
+            width: auto;
+            transition: margin 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .sidebar-logo h1 {
+            font-size: 1.5em;
+            font-weight: bold;
+            transition: display 0.3s ease;
+             color: #fff; /*logo text color*/
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f2f2f2; /* Light grey background, matched from image */
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Adjust main content margin when sidebar is collapsed */
+        .main-content.collapsed {
+            margin-left: 60px;
+        }
+
+       /* Topbar Styles */
+        .topbar {
+            background-color: #fff; /*white*/
+            color: #555;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #eee;
+            border-bottom: 3px solid #f7941d;/*orange bottom line*/
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .topbar-left .mobile-menu-button {  /*  NEW  */
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #555;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .topbar-left img {
+            margin-right: 10px;
+             height: 24px; /* Adjusted height */
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .topbar-right span {
+            margin-left: 20px;
+            position: relative;
+        }
+
+        .topbar-right span i {
+            margin-right: 5px;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: #f44336; /* Red badge color */
+            color: white;
+            border-radius: 50%;
+            padding: 2px 5px;
+            font-size: 0.7em;
+        }
+
+         /* Adjusted Profile Styles */
+        .topbar-right .profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer; /* Indicate it's clickable */
+            background-color: #f7941d; /* orange background*/
+            padding: 5px 8px;
+            border-radius: 5px;
+             color: #fff;
+        }
+
+        .topbar-right .profile img {
+            border-radius: 50%;
+            height: 24px; /* Same height as logo */
+            width: 24px; /* Ensure it's a circle */
+            margin-right: 5px; /* Space between image and name */
+        }
+
+        .topbar-right .profile span {
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+         /* Dashboard Cards Styles */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px; /* Reduced gap */
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 15px; /* Reduced padding */
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            border: 1px solid #eee;
+        }
+
+        .card:hover {
+            transform: translateY(-3px); /* Slight lift on hover */
+        }
+
+        .card i {
+            font-size: 2em;
+            color: #f7941d; /* Orange icon color */
+            margin-bottom: 8px; /* Reduced margin */
+        }
+
+        .card h3 {
+            font-size: 1.4em;
+            margin-bottom: 3px;
+            color: #555;
+        }
+
+        .card p {
+            font-size: 0.9em;
+            color: #777;
+        }
+
+         /* Social Cards Styles */
+        .social-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px; /* Reduced gap */
+            margin-top: 20px;
+        }
+
+        .social-card {
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 1em;
+            transition: transform 0.2s ease;
+             margin-bottom: 10px;/* add spacing bot*/
+             padding: 20px; /* increase padding */
+        }
+
+        .social-card:hover {
+            transform: scale(1.03); /* Slight zoom on hover */
+        }
+
+        .social-card h3 {
+            font-size: 1.2em;
+            margin-bottom: 3px;
+        }
+
+        .social-card span {
+            font-size: 0.7em;
+        }
+
+        .facebook {
+            background-color: #3b5998;
+        }
+
+        .twitter {
+            background-color: #55acee;
+        }
+
+        .linkedin {
+            background-color:#0077b5;
+        }
+
+        .googleplus {
+            background-color: #dd4b39;
+        }
+
+        /* Chart Styles */
+        #myChart {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            padding: 10px; /* Added padding to the chart area */
+        }
+
+        .chart-container {
+            width: 100%; /* Make the chart container responsive */
+            max-width: 100%; /* Ensure it doesn't overflow its container */
+        }
+
+        /* Hide text in list items when collapsed */
+        .sidebar li span {
+            transition: display 0.3s ease;
+        }
+
+        /* Content Styles (initially hidden) */
+        .content-section {
+            display: none;
+        }
+
+        /* Show active content */
+        .content-section.active {
+            display: block;
+        }
+
+        .main-title {
+            font-size: 1.75em; /* Slightly smaller */
+            color: #333;
+            margin-bottom: 15px; /* Reduced margin */
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px; /* Reduced padding */
+        }
+
+        /*  Media Query for Mobile Screens  */
+        @media (max-width: 768px) {
+
+            .topbar-left .mobile-menu-button {
+                display: block; /* Show menu button on mobile */
+            }
+
+            .topbar-right span, .topbar-right .profile span {
+                display: none; /* Hide items for smaller screens */
+            }
+
+            .topbar-right img { /* Smaller profile image */
+                height: 20px;
+                width: 20px;
+            }
+
+             .topbar-left img {  /*  smaller logo */
+                height: 20px;
+            }
+
+            /* Other Mobile Styles */
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+                position: fixed; /* Ensure sidebar is on top */
+                height: 100%;       /* Take the entire screen */
+            }
+
+            .sidebar.collapsed {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .main-content.collapsed {
+                margin-left: 0;
+            }
+
+             .dashboard-cards, .social-cards {
+                grid-template-columns: repeat(1, 1fr);  /* One column layout */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <button id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+
+        <div class="sidebar-logo">
+            <img src="your-logo.png" alt="Logo" height="40">
+            <h1>Pluto</h1>
+        </div>
+
+        <ul>
+            <li data-target="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </li>
+            <li data-target="widgets">
+                <i class="fas fa-th-large"></i>
+                <span>Widgets</span>
+            </li>
+            <li data-target="elements">
+                <i class="fas fa-cubes"></i>
+                <span>Elements</span>
+            </li>
+            <li data-target="tables">
+                <i class="fas fa-table"></i>
+                <span>Tables</span>
+            </li>
+            <li data-target="apps">
+                <i class="fas fa-rocket"></i>
+                <span>Apps</span>
+            </li>
+            <li data-target="pricing">
+                <i class="fas fa-tags"></i>
+                <span>Pricing Tables</span>
+            </li>
+            <li data-target="contact">
+                <i class="fas fa-envelope"></i>
+                <span>Contact</span>
+            </li>
+            <li data-target="additional">
+                <i class="fas fa-file-alt"></i>
+                <span>Additional Pages</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-button"><i class="fas fa-bars"></i></button>
+                <img src="your-logo.png" alt="Logo" height="24">
+                <span>Pluto</span>
+            </div>
+            <div class="topbar-right">
+                <span><i class="far fa-bell"></i><span class="badge">2</span></span>
+                <span><i class="far fa-question-circle"></i></span>
+                <span><i class="far fa-envelope"></i><span class="badge">3</span></span>
+                <div class="profile">
+                    <img src="your-profile.jpg" alt="Profile" height="24">
+                    <span>John David <i class="fas fa-caret-down"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard" class="content-section">
+            <h1 class="main-title">Dashboard</h1>
+            <div class="dashboard-cards">
+                <div class="card" onclick="cardClicked('Welcome')">
+                    <i class="far fa-smile"></i>
+                    <h3>2500</h3>
+                    <p>Welcome</p>
+                </div>
+                <div class="card" onclick="cardClicked('Average Time')">
+                    <i class="far fa-clock"></i>
+                    <h3>123.50</h3>
+                    <p>Average Time</p>
+                </div>
+                <div class="card" onclick="cardClicked('Collections')">
+                    <i class="fas fa-cloud-download-alt"></i>
+                    <h3>1,805</h3>
+                    <p>Collections</p>
+                </div>
+                <div class="card" onclick="cardClicked('Comments')">
+                    <i class="far fa-comment-dots"></i>
+                    <h3>54</h3>
+                    <p>Comments</p>
+                </div>
+            </div>
+
+             <div class="social-cards">
+                <div class="social-card facebook" onclick="cardClicked('Facebook Friends')">
+                    <h3>35k</h3>
+                    <p>Friends</p>
+                    <span>128 Feeds</span>
+                </div>
+                <div class="social-card twitter" onclick="cardClicked('Twitter Followers')">
+                    <h3>584k</h3>
+                    <p>Followers</p>
+                    <span>978 Tweets</span>
+                </div>
+                <div class="social-card linkedin" onclick="cardClicked('LinkedIn Contacts')">
+                    <h3>758+</h3>
+                    <p>Contacts</p>
+                    <span>365 Feeds</span>
+                </div>
+                <div class="social-card googleplus" onclick="cardClicked('Google+ Followers')">
+                    <h3>450</h3>
+                    <p>Followers</p>
+                    <span>57 Circles</span>
+                </div>
+            </div>
+
+            <div>
+                <h2>Extra Area Chart</h2>
+                 <div class="chart-container">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Widgets Content -->
+        <div id="widgets" class="content-section">
+            <h1 class="main-title">Widgets</h1>
+            <p>This is the widgets section.</p>
+            {/* Add your widgets content here */}
+        </div>
+
+         <!-- Elements Content -->
+        <div id="elements" class="content-section">
+            <h1 class="main-title">Elements</h1>
+            <p>This is the elements section.</p>
+            {/* Add your elements content here */}
+        </div>
+
+        <!-- Tables Content -->
+        <div id="tables" class="content-section">
+            <h1 class="main-title">Tables</h1>
+            <p>This is the tables section.</p>
+            {/* Add your tables content here */}
+        </div>
+
+        <!-- Apps Content -->
+        <div id="apps" class="content-section">
+            <h1 class="main-title">Apps</h1>
+            <p>This is the apps section.</p>
+            {/* Add your apps content here */}
+        </div>
+
+        <!-- Pricing Tables Content -->
+        <div id="pricing" class="content-section">
+            <h1 class="main-title">Pricing Tables</h1>
+            <p>This is the pricing tables section.</p>
+            {/* Add your pricing tables content here */}
+        </div>
+
+        <!-- Contact Content -->
+        <div id="contact" class="content-section">
+            <h1 class="main-title">Contact</h1>
+            <p>This is the contact section.</p>
+            {/* Add your contact content here */}
+        </div>
+
+        <!-- Additional Pages Content -->
+        <div id="additional" class="content-section">
+            <h1 class="main-title">Additional Pages</h1>
+            <p>This is the additional pages section.</p>
+            {/* Add your additional pages content here */}
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const mobileSidebarToggle = document.querySelector('.topbar-left .mobile-menu-button');  // NEW
+        const mainContent = document.querySelector('.main-content');
+        const contentSections = document.querySelectorAll('.content-section');
+        const sidebarItems = document.querySelectorAll('.sidebar li');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('collapsed');
+        });
+
+        // NEW - Mobile toggle
+        mobileSidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+         // Function to set the active state and show content based on hash
+        function navigateTo(hash) {
+            // Remove active class from all sidebar items and content sections
+            sidebarItems.forEach(li => li.classList.remove('active'));
+            contentSections.forEach(section => section.classList.remove('active'));
+
+            // If there's no hash, default to the dashboard
+            const target = hash ? hash.substring(1) : 'dashboard'; // Remove the '#'
+
+            // Find the corresponding sidebar item and content section
+            const activeSidebarItem = document.querySelector(`.sidebar li[data-target="${target}"]`);
+            const activeContentSection = document.getElementById(target);
+
+            // Add active class to the selected sidebar item and content section
+            if (activeSidebarItem) {
+                activeSidebarItem.classList.add('active');
+            }
+            if (activeContentSection) {
+                activeContentSection.classList.add('active');
+            }
+        }
+
+        // Initial navigation based on current hash (on page load)
+        navigateTo(window.location.hash);
+
+        // Attach click event listeners to sidebar items
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default anchor behavior
+
+                const target = this.dataset.target;
+                window.location.hash = target; // Set the URL hash
+
+                navigateTo(`#${target}`); // Manually navigate
+            });
+        });
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', () => {
+            navigateTo(window.location.hash);
+        });
+
+        function cardClicked(cardName) {
+            alert('You clicked on the ' + cardName + ' card!');
+        }
+
+        // Chart.js setup
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Data',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
